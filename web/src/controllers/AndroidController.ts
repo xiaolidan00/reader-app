@@ -18,15 +18,16 @@ export default {
   },
   //阅读完毕保存进度
   readedTxt(id: string, chapter: number, index: number, total: number) {
-    window.Android.readedTxt(id, chapter, index, total);
+    // window.Android.readedTxt(id, chapter, index, total);
   },
   //获取当前书内容
   getTxt(id: string) {
     // window.Android.getTxt(id);
   },
   //获取内容
-  readTxt(path: string) {
-    window.Android.readTxt(path);
+  readTxt(id: string) {
+    console.log(id);
+    window.Android.readTxt(id);
   },
   //文件不存在返回列表
   backList() {},

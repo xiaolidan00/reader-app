@@ -9,6 +9,8 @@ import com.example.myapplication.MainActivity;
 
 import org.json.JSONException;
 
+import java.io.FileNotFoundException;
+
 public class WebAppInterface {
     MainActivity mContext;
 
@@ -27,6 +29,15 @@ public class WebAppInterface {
     @JavascriptInterface
     public void openTxt() {//打开txt文件
         mContext.openFile();
+    }
+    @JavascriptInterface
+    public void readTxt(String id) throws FileNotFoundException, JSONException {//打开txt文件
+
+        mContext.readTxt(id);
+    }
+    @JavascriptInterface
+    public void readedTxt()   {//打开txt文件
+
     }
 
     @JavascriptInterface

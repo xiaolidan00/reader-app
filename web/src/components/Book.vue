@@ -44,6 +44,7 @@
   import {PageNum, LineNum} from "../data";
   import {selectBook, loading, bookItem, chapterList, setHighlight, currentChapter, currentIndex} from "../config.ts";
   import AndroidController from "../controllers/AndroidController.ts";
+  import {EventBus} from "../utils/EventEmitter.ts";
 
   //<InstanceType<typeof ListenPage>>
   const listenRef = ref();
@@ -235,7 +236,6 @@
     dom.click();
   };
   updateBook();
-  window.Android.on("readTxt", onReadTxt);
 
   const backList = () => {
     loading.value = false;
@@ -243,7 +243,7 @@
     selectBook.value = "";
     alert("TXT已删除，不可阅读！");
   };
-  window.Android.on("backList", backList);
+
   const closeBook = () => {
     AndroidController.closedBook(
       selectBook.value + "",
@@ -252,7 +252,7 @@
       chapterList.value.length
     );
   };
-  window.Android.on("closeBook", closeBook);
+
   const onKeyPress = (ev: KeyboardEvent) => {
     switch (ev.code) {
       case "ArrowDown":
@@ -266,7 +266,11 @@
     }
   };
   onMounted(() => {
-    AndroidController.readTxt(bookItem.value!.path);
+    EventBus.on("readTxt", onReadTxt);
+
+    EventBus.on("backList", backList);
+    EventBus.on("closeBook", closeBook);
+    AndroidController.readTxt(selectBook.value);
     window.addEventListener("keyup", onKeyPress);
   });
   onBeforeUnmount(() => {

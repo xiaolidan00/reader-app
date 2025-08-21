@@ -17,6 +17,7 @@
 
     console.log("🚀 ~ App.vue ~ result:", eventName, result);
   };
+  console.log(window.Android);
 </script>
 
 <template>

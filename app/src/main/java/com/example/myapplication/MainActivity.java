@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import android.provider.OpenableColumns;
+
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -19,25 +20,23 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.myapplication.databinding.ActivityMainBinding;
-import com.example.myapplication.entity.Book;
+
 import com.example.myapplication.entity.TxtInfo;
 import com.example.myapplication.utils.BookUtil;
 import com.example.myapplication.utils.DbHelper;
-import com.example.myapplication.utils.FileUtil;
+
 import com.example.myapplication.utils.WebAppInterface;
 
 import org.json.JSONException;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,26 +59,36 @@ public class MainActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             startActivityForResult(intent, TXT_CODE);
+
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 201);
         }
 
     }
+    public  void readTxt(String id) throws FileNotFoundException, JSONException {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            BookUtil.readTxt(this, dbHelper, id);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 201);
+        }
+    }
 
     public void getList() throws JSONException {
         BookUtil.getList(dbHelper, this);
     }
-    public  void delTxt(String[] ids,String type) throws JSONException {
+
+    public void delTxt(String[] ids, String type) throws JSONException {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             BookUtil.delTxt(dbHelper, this, ids, type);
             BookUtil.getList(dbHelper, this);
-        }else{
+        } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 201);
         }
     }
-    private  void checkPermission(){
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED||ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 201);
+
+    private void checkPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 201);
         }
     }
 
@@ -98,7 +107,9 @@ public class MainActivity extends AppCompatActivity {
                 while (currentItem < count) {
                     Uri uri = data.getClipData().getItemAt(currentItem).getUri();
                     TxtInfo txt = getTxtInfo(uri);
+
                     list.add(txt);
+
                     currentItem++;
                 }
 
@@ -113,7 +124,10 @@ public class MainActivity extends AppCompatActivity {
                 List<TxtInfo> list = new ArrayList<TxtInfo>();
                 Uri uri = data.getData();
                 TxtInfo txt = getTxtInfo(uri);
+
                 list.add(txt);
+
+
                 BookUtil.openTxt(dbHelper, list);
                 try {
                     BookUtil.getList(dbHelper, this);
@@ -129,16 +143,23 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         cursor.moveToFirst();
 
-        String path = FileUtil.getFileAbsolutePath(this,uri);
+        String path = uri.getPath();
+
         int size = cursor.getInt(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE));
         String name = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-        name=name.substring(0,name.lastIndexOf("."));
+        name = name.substring(0, name.lastIndexOf("."));
         TxtInfo txt = new TxtInfo(name, size, path);
         Log.d("chooseFile", "path=" + path + ",name=" + name + ",size=" + size);
 
         return txt;
+
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPermission();
+    }
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,20 +212,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void doJs(String eventName, String result) {
-        myWebView.evaluateJavascript("AndroidResult('" + eventName + "'," + result + ")", new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String s) {
 
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                myWebView.evaluateJavascript("AndroidResult('" + eventName + "'," + result + ")", new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String s) {
+
+                    }
+                });
             }
         });
+
     }
 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // Check whether the key event is the Back button and if there's history.
-        if ((keyCode == KeyEvent.KEYCODE_BACK) ) {
-            this.doJs("backList","");
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            this.doJs("backList", "");
             return true;
         }
         // If it isn't the Back button or there's no web page history, bubble up to

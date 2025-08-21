@@ -112,7 +112,7 @@
       isLock = false;
     }, 1000);
   };
-  // window.Android.on("listTxt", refreshTxt);
+  // EventBus.on("listTxt", refreshTxt);
   // window.Android.send("currentPage", "list");
   const onDragOver = (ev: DragEvent) => {
     ev.preventDefault();
