@@ -6,8 +6,6 @@ export type BookType = {
   total: number;
   num: number;
   updateTime: number;
-  importTime: number;
-  readTime: number;
   path: string;
   group: string;
   disable?: boolean;

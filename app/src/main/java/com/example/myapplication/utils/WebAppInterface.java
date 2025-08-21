@@ -7,6 +7,8 @@ import android.widget.Toast;
 
 import com.example.myapplication.MainActivity;
 
+import org.json.JSONException;
+
 public class WebAppInterface {
     MainActivity mContext;
 
@@ -24,12 +26,16 @@ public class WebAppInterface {
 
     @JavascriptInterface
     public void openTxt() {//打开txt文件
-        Toast.makeText(mContext, "openTxt", Toast.LENGTH_SHORT).show();
         mContext.openFile();
     }
 
     @JavascriptInterface
-    public void listTxt() {//获取最新的txt列表
-
+    public void getList() throws JSONException {//获取最新的txt列表
+        mContext.getList();
     }
+    @JavascriptInterface
+    public void delTxt(String[] ids,String type) throws JSONException {//删除记录
+        mContext.delTxt(ids,type);
+    }
+
 }

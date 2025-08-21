@@ -2,7 +2,7 @@ package com.example.myapplication.entity;
 
 import java.util.Arrays;
 
-public class ChapterEntity {
+public class Chapter {
     //章节标题
     private  String title;
     //章节内容
@@ -23,11 +23,5 @@ public class ChapterEntity {
         this.title = title;
     }
 
-    @Override
-    public String toString() {
-        return "ChapterEntity{" +
-                "title='" + title + '\'' +
-                ", content=" + Arrays.toString(content) +
-                '}';
-    }
+
 }

@@ -4,6 +4,7 @@
   import {BookType} from "../@types";
   import {cloneDeep} from "lodash-es";
   import AndroidController from "../controllers/AndroidController.ts";
+  import {EventBus} from "../utils/EventEmitter.ts";
   const detailSet: Array<{name: string; prop: keyof BookType; idx?: boolean}> = [
     {name: "文件路径", prop: "path"},
     {name: "共有章节", prop: "total"},
@@ -42,8 +43,12 @@
     bookItem.value = item;
   };
   const onReadTxt = (item: BookType) => {
-    selectBook.value = item.id;
-    bookItem.value = item;
+    if (state.isEdit) {
+      onCheckItem(item);
+    } else {
+      selectBook.value = item.id;
+      bookItem.value = item;
+    }
   };
   const onDelTxt = (type: "record" | "file") => {
     const ids: string[] = [];
@@ -53,6 +58,7 @@
       }
     }
     if (ids.length) {
+      console.log("delTxt", ids);
       AndroidController.delTxt(ids, type);
     }
 
@@ -90,11 +96,12 @@
   };
 
   let isLock = false;
-  const refreshTxt = (_event: any, data: any) => {
+  const refreshTxt = (data: BookType[]) => {
     if (isLock) return;
     isLock = true;
     console.log("refreshTxt", data);
     dataList.value = data;
+    localStorage.setItem("BOOK_LIST", JSON.stringify(data));
     orginMap = {};
     data.forEach((a: BookType) => {
       orginMap[a.id] = false;
@@ -110,29 +117,7 @@
   const onDragOver = (ev: DragEvent) => {
     ev.preventDefault();
   };
-  // const onDropFile = (ev: DragEvent) => {
-  //   ev.preventDefault();
-  //   let fileList: string[] = [];
-  //   if (ev.dataTransfer?.items?.length) {
-  //     const items = ev.dataTransfer.items;
-  //     for (let i = 0; i < items.length; i++) {
-  //       const item = items[i];
-  //       if (item.type === "file") {
-  //         const f = item.getAsFile()!;
-  //         if (f.name.endsWith(".txt")) fileList.push(f.path);
-  //       }
-  //     }
-  //   }
 
-  //   if (fileList.length === 0 && ev.dataTransfer?.files?.length) {
-  //     fileList = Array.from(ev.dataTransfer.files)
-  //       .filter((it) => it.name.endsWith(".txt"))
-  //       .map((it) => it.path);
-  //   }
-  //   if (fileList.length) {
-  //     window.Android.send("dragTxt", fileList);
-  //   }
-  // };
   const onBatch = () => {
     state.isEdit = !state.isEdit;
     state.checkMap = cloneDeep(orginMap);
@@ -141,13 +126,10 @@
     return t.replace(/[,，！!、]/g, "").substring(0, 25);
   };
   onMounted(() => {
-    // document.addEventListener("dragover", onDragOver);
-    // document.addEventListener("drop", onDropFile);
+    EventBus.on("listTxt", refreshTxt);
   });
   onBeforeUnmount(() => {
-    window.Android.off("listTxt", refreshTxt);
-    // document.removeEventListener("dragover", onDragOver);
-    // document.removeEventListener("drop", onDropFile);
+    EventBus.off("listTxt", refreshTxt);
   });
 </script>
 

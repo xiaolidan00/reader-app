@@ -189,7 +189,7 @@
   const onChapterItem = (idx: number) => {
     onChapter(idx, 0);
   };
-  AndroidController.getTxt(selectBook.value);
+
   let isFirst = true;
   const onReadTxt = (_event: any, data: ChapterType[]) => {
     if (isFirst) {
@@ -237,8 +237,6 @@
   updateBook();
   window.Android.on("readTxt", onReadTxt);
 
-  window.Android.send("currentPage", "book");
-
   const backList = () => {
     loading.value = false;
     console.log("TXT DELETE");
@@ -268,6 +266,7 @@
     }
   };
   onMounted(() => {
+    AndroidController.readTxt(bookItem.value!.path);
     window.addEventListener("keyup", onKeyPress);
   });
   onBeforeUnmount(() => {

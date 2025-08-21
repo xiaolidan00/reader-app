@@ -6,6 +6,7 @@
   import {EventBus} from "./utils/EventEmitter";
   import {selectBook, loading} from "./config";
   import VConsole from "vconsole";
+
   const vConsole = new VConsole();
   const currentPart = computed(() => {
     return selectBook.value ? Book : List;
@@ -13,6 +14,7 @@
 
   window.AndroidResult = (eventName: string, result: any) => {
     EventBus.emit(eventName, result);
+
     console.log("🚀 ~ App.vue ~ result:", eventName, result);
   };
 </script>
